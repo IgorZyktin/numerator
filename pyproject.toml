@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "numerator"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     { name = "Igor Zyktin", email = "nicord@yandex.ru" },
 ]
@@ -22,3 +22,4 @@ classifiers = [
 
 [project.scripts]
 numerate = "numerator.main:main"
+numerator = "numerator.main:main"
