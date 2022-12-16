@@ -9,13 +9,13 @@ import os
 import re
 import sys
 from collections import Counter
-from functools import cached_property
 from pathlib import Path
 from typing import Callable
 from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import NamedTuple
+from typing import Optional
 
 DIGITS = re.compile(r'[^0123456789]*([0123456789]+).*')
 
@@ -81,12 +81,12 @@ class File:
         """Return textual representation."""
         return f'<File "{self.filename}">'  # pragma: no cover
 
-    @cached_property
+    @property
     def name(self) -> str:
         """Extract name without extension."""
         return Path(self.filename).stem
 
-    @cached_property
+    @property
     def ext(self) -> str:
         """Extract extension."""
         suffix = Path(self.filename).suffix
@@ -146,6 +146,8 @@ class Folder:
         """Initialize instance."""
         self.path = path
         self.files: List[File] = []
+        self._majority: Optional[str] = None
+        self._padding: Optional[int] = None
 
     def __repr__(self) -> str:
         """Return textual representation."""
@@ -162,22 +164,26 @@ class Folder:
         """Iterate on files."""
         return iter(self.files)
 
-    @cached_property
+    @property
     def majority(self) -> str:
         """Return most popular extension in the folder."""
-        extensions = [
-            file.ext.casefold()
-            for file in self.files
-            if file.ext.casefold()
-        ]
-        counter = Counter(extensions)
-        return counter.most_common(1)[0][0]
+        if self._majority is None:
+            extensions = [
+                file.ext.casefold()
+                for file in self.files
+                if file.ext.casefold()
+            ]
+            counter = Counter(extensions)
+            self._majority = counter.most_common(1)[0][0]
+        return self._majority
 
-    @cached_property
+    @property
     def padding(self) -> int:
         """Return amount of zeroes to pad."""
-        names = [file.name for file in self.files]
-        return calculate_padding(names)
+        if self._padding is None:
+            names = [file.name for file in self.files]
+            self._padding = calculate_padding(names)
+        return self._padding
 
 
 def get_config(*given_args: str) -> Config:
