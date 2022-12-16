@@ -306,7 +306,7 @@ def run(
                         f'{file.old_filename!r} to {file.new_filename!r}'
                     )
 
-    if i == 1:
+    if i == 0:
         callback('Nothing to rename')
 
 
