@@ -12,7 +12,9 @@ from collections import Counter
 from functools import cached_property
 from pathlib import Path
 from typing import Callable
+from typing import Dict
 from typing import Iterator
+from typing import List
 from typing import NamedTuple
 
 DIGITS = re.compile(r'[^0123456789]*([0123456789]+).*')
@@ -21,7 +23,7 @@ DIGITS = re.compile(r'[^0123456789]*([0123456789]+).*')
 class Config(NamedTuple):
     """Application configuration."""
     cwd: Path
-    replace: dict[str, str]
+    replace: Dict[str, str]
 
 
 def add_padding(
@@ -46,7 +48,7 @@ def add_padding(
     return new_filename
 
 
-def calculate_padding(names: list[str]) -> int:
+def calculate_padding(names: List[str]) -> int:
     """Return max amount of digits on the left side of the name."""
     padding = 0
 
@@ -96,15 +98,16 @@ class File:
             majority: str,
     ) -> bool:
         """Return True if file looks like the type we're interested in."""
+        case_folded = self.ext.casefold()
         return all((
-            bool(cased := self.ext.casefold()),
-            cased == majority.casefold(),
+            bool(case_folded),
+            case_folded == majority.casefold(),
         ))
 
     def get_new_filename(
             self,
             padding: int,
-            replace: dict[str, str],
+            replace: Dict[str, str],
     ) -> str:
         """Get new padded filename."""
         new_filename = add_padding(self.old_filename, padding)
@@ -117,7 +120,7 @@ class File:
     def rename_to_pattern(
             self,
             padding: int,
-            replace: dict[str, str],
+            replace: Dict[str, str],
     ) -> bool:
         """Rename file with name of given pattern, rename True if done."""
         new_filename = self.get_new_filename(padding, replace)
@@ -139,7 +142,7 @@ class Folder:
     ) -> None:
         """Initialize instance."""
         self.path = path
-        self.files: list[File] = []
+        self.files: List[File] = []
 
     def __repr__(self) -> str:
         """Return textual representation."""
@@ -160,9 +163,9 @@ class Folder:
     def majority(self) -> str:
         """Return most popular extension in the folder."""
         extensions = [
-            cased
+            file.ext.casefold()
             for file in self.files
-            if (cased := file.ext.casefold())
+            if file.ext.casefold()
         ]
         counter = Counter(extensions)
         return counter.most_common(1)[0][0]
@@ -209,7 +212,7 @@ def get_config(*args: str) -> Config:
         print(f'Directory does not exist: {path.absolute()}')
         sys.exit(1)
 
-    replace: dict[str, str] = {}
+    replace: Dict[str, str] = {}
     if args.replace is not None:
         for each in args.replace:
             parts = each.split('=')
