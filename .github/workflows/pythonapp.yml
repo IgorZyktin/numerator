@@ -1,0 +1,31 @@
+name: numerator
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.6'
+
+      - name: Install dependencies
+        run: |
+          pip install -U pip
+
+      - name: Lint with flake8
+        uses: py-actions/flake8@v1
+        with:
+          path: "numerator"
+          ignore: "F403"
+
+      - name: Test with unittest
+        run: |
+          python -m unittests ./numerator/test_main.py
+
+      - name: Test with mypy
+        run: |
+          pip install mypy
+          mypy ./numerator

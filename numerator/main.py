@@ -180,7 +180,7 @@ class Folder:
         return calculate_padding(names)
 
 
-def get_config(*args: str) -> Config:
+def get_config(*given_args: str) -> Config:
     """Return application configuration object."""
     parser = argparse.ArgumentParser(
         description='Rename files in folder from '
@@ -212,7 +212,7 @@ def get_config(*args: str) -> Config:
         help='show changes but not apply them'
     )
 
-    args = parser.parse_args(args)
+    args = parser.parse_args(given_args)
 
     if args.path is not None:
         path = Path(args.path)
