@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "numerator"
+version = "1.0.0"
+authors = [
+    { name = "Igor Zyktin", email = "nicord@yandex.ru" },
+]
+description = "Script that automatically renames files, so they get equally zero left padded names"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/IgorZyktin/numerator"
+
+[project.scripts]
+numerate = "numerator.main:main"
