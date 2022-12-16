@@ -23,7 +23,7 @@ jobs:
 
       - name: Test with unittest
         run: |
-          python -m unittests ./numerator/test_main.py
+          python -m unittest discover ./numerator
 
       - name: Test with mypy
         run: |
