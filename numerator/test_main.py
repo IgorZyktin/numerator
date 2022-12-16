@@ -43,7 +43,7 @@ class TestRenameNothing(BaseFolderTest):
             sorted(os.listdir(self.tmp_dir.name)),
             ['other.txt', 'some', 'test.txt'],
         )
-        self.callback.assert_not_called()
+        self.callback.assert_called()
 
 
 class TestRenameSimple(BaseFolderTest):

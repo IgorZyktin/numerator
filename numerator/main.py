@@ -283,8 +283,9 @@ def run(
     """Apply changes."""
     digits = len(str(len(target_folder.files)))
     template = f'{{:0{digits}d}}'
+    i = 0
 
-    for i, file in enumerate(target_folder, start=1):
+    for file in target_folder:
         if file.looks_like_target(target_folder.majority):
             renamed = file.rename_to_pattern(
                 padding=target_folder.padding,
@@ -293,6 +294,7 @@ def run(
             )
 
             if renamed:
+                i += 1
                 if config.dry_run:
                     callback(
                         f'\t{template.format(i)}. Planning to rename '
@@ -303,6 +305,9 @@ def run(
                         f'\t{template.format(i)}. Renamed '
                         f'{file.old_filename!r} to {file.new_filename!r}'
                     )
+
+    if i == 1:
+        callback('Nothing to rename')
 
 
 if __name__ == '__main__':
