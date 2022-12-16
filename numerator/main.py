@@ -24,6 +24,7 @@ class Config(NamedTuple):
     """Application configuration."""
     cwd: Path
     replace: Dict[str, str]
+    dry_run: bool
 
 
 def add_padding(
@@ -121,14 +122,16 @@ class File:
             self,
             padding: int,
             replace: Dict[str, str],
+            dry_run: bool,
     ) -> bool:
         """Rename file with name of given pattern, rename True if done."""
         new_filename = self.get_new_filename(padding, replace)
 
         if new_filename != self.old_filename:
             self.new_filename = new_filename
-            (self.path / self.old_filename).rename(
-                self.path / self.new_filename)
+            if not dry_run:
+                (self.path / self.old_filename).rename(
+                    self.path / self.new_filename)
             return True
         return False
 
@@ -201,6 +204,14 @@ def get_config(*args: str) -> Config:
         help='part of filename that should be replaced, like source=target'
     )
 
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        dest='dry_run',
+        default=False,
+        help='show changes but not apply them'
+    )
+
     args = parser.parse_args(args)
 
     if args.path is not None:
@@ -229,6 +240,7 @@ def get_config(*args: str) -> Config:
     return Config(
         cwd=path,
         replace=replace,
+        dry_run=args.dry_run,
     )
 
 
@@ -245,9 +257,12 @@ def main():
     target_folder = get_target_folder(config.cwd)
     padding = target_folder.padding
 
-    text = f'Renaming files in {target_folder} to padding {padding}'
+    text = f'Renaming {len(target_folder.files)} files to padding {padding}'
+
     if config.replace:
-        text += f', using replace {config.replace!r}'
+        text += f'\nUsing replace {config.replace!r}'
+
+    text += f'\n{target_folder}'
 
     print(text)
 
@@ -260,17 +275,28 @@ def run(
         callback: Callable = print,
 ) -> None:
     """Apply changes."""
-    for file in target_folder:
+    digits = len(str(len(target_folder.files)))
+    template = f'{{:0{digits}d}}'
+
+    for i, file in enumerate(target_folder, start=1):
         if file.looks_like_target(target_folder.majority):
             renamed = file.rename_to_pattern(
                 padding=target_folder.padding,
                 replace=config.replace,
+                dry_run=config.dry_run,
             )
 
             if renamed:
-                callback(
-                    f'\tRenamed {file.old_filename} to {file.new_filename}'
-                )
+                if config.dry_run:
+                    callback(
+                        f'\t{template.format(i)}. Planning to rename '
+                        f'{file.old_filename!r} to {file.new_filename!r}'
+                    )
+                else:
+                    callback(
+                        f'\t{template.format(i)}. Renamed '
+                        f'{file.old_filename!r} to {file.new_filename!r}'
+                    )
 
 
 if __name__ == '__main__':
